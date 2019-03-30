@@ -10,6 +10,7 @@ void setup()
 
 void loop()
 {
+  
   //Serial.println(digitalRead(2));
 
   if (movingState == HIGH) 
@@ -24,8 +25,8 @@ void loop()
 
 void pin_ISR()
 {
-  movingState = movingState==0? 1: 0;
-  
+  movingState = digitalRead(2);
+  Serial.print("Pin 2 value: "); Serial.println(movingState);
   switch(movingState){
     case 0: Serial.println("moving object gone");
     break;
