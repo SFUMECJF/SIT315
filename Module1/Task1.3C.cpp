@@ -24,7 +24,7 @@ void loop()
 
 void pin_ISR_motion()
 {
-  movingState = movingState==0? 1: 0;
+  movingState = digitalRead(2);
   
   switch(movingState){
     case 0: Serial.println("moving object gone");
