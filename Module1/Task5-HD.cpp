@@ -40,3 +40,15 @@ void loop(void)
     }  
     delay(1000); // Wait for 1000 millisecond(s)
 }
+
+
+//MAKEFILE
+# Set the name of your application:
+APPLICATION = task1
+# If no BOARD is found in the environment, use this default:
+BOARD ?= native
+# This has to be the absolute path to the RIOT base directory:
+RIOTBASE ?= $(CURDIR)/../../RIOT
+
+USEMODULE += arduino
+include $(RIOTBASE)/Makefile.include
