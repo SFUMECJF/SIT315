@@ -35,24 +35,7 @@ vector<int> populateMatrix(const int rows, const int columns) {
 
 }
 
-vector<int> multiplyMatirx(vector<int> A, vector<int> B, int A_rows, int A_columns, int B_rows, int B_columns,int startingRow =0,int endingRow=0) {
-    vector<int> C;
-    for (int y = startingRow; y <= endingRow; y++) {
-        for (int x = 0; x < A_columns; x++) {
-            int val = 0;
-            for (int e = 0; e < A_columns; e++) {
-                int Aindex = (y * A_columns) + e;
-                int Bindex = (e * B_columns) + x;
-                int j = A[Aindex];//A[y][e];
-                int k = B[Bindex];
 
-                val += j * k;
-            }
-            C.push_back(val);
-        }
-    }
-    return C;
-}
 
 void saveToFile(string file_name,vector<int> C, int A_rows, int B_columns) {
     printf("SAVING : %d x %d\n",A_rows,B_columns);
@@ -81,27 +64,11 @@ void saveToFile(string file_name,vector<int> C, int A_rows, int B_columns) {
 }
 
 
-struct threadParams{
-    vector<int> *A;
-    vector<int> *B;
-    vector<int> C;
-    int A_rows;
-    int A_columns;
-    int B_rows;
-    int B_columns;
-    int startingRow;
-    int endingRow;
-    long threadId;
-};
-
-
-
-
 int main() {
 
     double time_elapsed = 0.0;
 
-    const int A_rows = 1000;
+    const int A_rows = 500;
     const int A_columns = A_rows;
     const int B_rows = A_columns;
     const int B_columns = B_rows;
@@ -125,31 +92,28 @@ int main() {
 
     //multiply A and B
 
-    int THREAD_COUNT = 5;   //5 main threads and 1 thread to process all remaining
-    THREAD_COUNT = A_rows < THREAD_COUNT ? A_rows: THREAD_COUNT;
-
-    int range = A_rows / THREAD_COUNT;
-    range = A_rows % THREAD_COUNT == 0 ? range : range + 1;
-    printf("RANGE : %d\n",range);
+    int THREAD_COUNT = 8;   //5 main threads and 1 thread to process all remaining
 
     vector<int> results[THREAD_COUNT];
 
-    #pragma omp parallel num_threads(THREAD_COUNT)
+#pragma omp parallel num_threads(THREAD_COUNT) shared(results)
     {
         int i = omp_get_thread_num();
-        int startIndex = i * range;
-        int endIndex = startIndex+ range-1;
 
+#pragma omp for
+        for (int y = 0; y <= A_rows; y++) {
+            for (int x = 0; x < A_columns; x++) {
+                int val = 0;
+                for (int e = 0; e < A_columns; e++) {
+                    int Aindex = (y * A_columns) + e;
+                    int Bindex = (e * B_columns) + x;
+                    int j = A[Aindex];//A[y][e];
+                    int k = B[Bindex];
 
-        if (endIndex > (A_rows-1)) {
-            if(endIndex-A_rows<=range)
-                endIndex = A_rows-1;
-        }
-
-        if (endIndex < A_rows && startIndex <=endIndex) {
-
-            results[i] = multiplyMatirx(A,B,A_rows,A_columns,B_rows,B_columns,startIndex,endIndex);
-
+                    val += j * k;
+                }
+                results[i].push_back(val);
+            }
         }
     }
 
