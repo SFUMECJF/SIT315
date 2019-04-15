@@ -68,7 +68,7 @@ int main() {
 
     double time_elapsed = 0.0;
 
-    const int A_rows = 500;
+    const int A_rows = 1000;
     const int A_columns = A_rows;
     const int B_rows = A_columns;
     const int B_columns = B_rows;
@@ -92,25 +92,22 @@ int main() {
 
     //multiply A and B
 
-    int THREAD_COUNT = 8;   //5 main threads and 1 thread to process all remaining
+    int THREAD_COUNT = 4;   //5 main threads and 1 thread to process all remaining
 
     vector<int> results[THREAD_COUNT];
 
-#pragma omp parallel num_threads(THREAD_COUNT) shared(results)
+    int i,y,x;
+    int val;
+    #pragma omp parallel num_threads(THREAD_COUNT) private(i) shared(results)
     {
-        int i = omp_get_thread_num();
+        i = omp_get_thread_num();
 
-#pragma omp for
-        for (int y = 0; y <= A_rows; y++) {
-            for (int x = 0; x < A_columns; x++) {
-                int val = 0;
+        #pragma omp for private(y,x,val) collapse(2)
+        for  (y = 0; y < A_rows; y++) {
+            for (x = 0; x < A_columns; x++) {
+                val = 0;
                 for (int e = 0; e < A_columns; e++) {
-                    int Aindex = (y * A_columns) + e;
-                    int Bindex = (e * B_columns) + x;
-                    int j = A[Aindex];//A[y][e];
-                    int k = B[Bindex];
-
-                    val += j * k;
+                    val += A[(y * A_columns) + e] * B[(e * B_columns) + x];
                 }
                 results[i].push_back(val);
             }
